@@ -1,0 +1,407 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  password      String
+  name          String
+  bio           String?   @db.Text
+  avatar        String?
+  coverImage    String?
+  location      String?
+  website       String?
+  birthDate     DateTime?
+  isVerified    Boolean      @default(false)
+  isPrivate     Boolean      @default(false)
+  role          PlatformRole @default(USER)
+  isBanned      Boolean      @default(false)
+  canPost       Boolean      @default(true)
+  canComment    Boolean      @default(true)
+  canMessage    Boolean      @default(true)
+  canGoLive     Boolean      @default(false)
+  canCreateGroups Boolean    @default(true)
+  canSellItems  Boolean      @default(true)
+  canVoiceCall  Boolean      @default(true)
+  canVideoCall  Boolean      @default(true)
+  notifyLikes       Boolean  @default(true)
+  notifyComments    Boolean  @default(true)
+  notifyFollows     Boolean  @default(true)
+  notifyMessages    Boolean  @default(true)
+  notifyFriendReqs  Boolean  @default(true)
+  showActivity      Boolean  @default(true)
+  allowTagging      Boolean  @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  posts         Post[]
+  liveStreams   LiveStream[]
+  comments      Comment[]
+  likes         Like[]
+  stories       Story[]
+  sentMessages  Message[]       @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  notifications Notification[]
+  followers     Follow[]        @relation("Following")
+  following     Follow[]        @relation("Follower")
+  groupMembers  GroupMember[]
+  eventAttendees EventAttendee[]
+  savedPosts    SavedPost[]
+  marketplaceItems MarketplaceItem[]
+  reels         Reel[]
+  pages         Page[]
+  pageFollows   PageFollow[]
+  friendships   Friendship[]    @relation("UserFriendships")
+  friendOf      Friendship[]    @relation("FriendOf")
+  sessions      Session[]
+  accounts      Account[]
+  reportsMade   Report[]     @relation("ReportsMade")
+  reportsReviewed Report[]   @relation("ReportsReviewed")
+  callSignalsSent CallSignal[] @relation("SignalsSent")
+  callSignalsReceived CallSignal[] @relation("SignalsReceived")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  image     String?
+  video     String?
+  location  String?
+  privacy   Privacy  @default(PUBLIC)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     Like[]
+  savedBy   SavedPost[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  authorId  String
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model Story {
+  id        String   @id @default(cuid())
+  image     String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  image      String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  senderId   String
+  receiverId String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  content   String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  followerId  String
+  followingId String
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model Friendship {
+  id        String           @id @default(cuid())
+  status    FriendshipStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  userId    String
+  friendId  String
+  user      User             @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  friend    User             @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  name        String
+  description String?       @db.Text
+  coverImage  String?
+  avatar      String?
+  privacy     Privacy       @default(PUBLIC)
+  createdAt   DateTime      @default(now())
+  members     GroupMember[]
+}
+
+model GroupMember {
+  id       String    @id @default(cuid())
+  role     GroupRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+  userId   String
+  groupId  String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group    Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model Event {
+  id          String          @id @default(cuid())
+  title       String
+  description String?         @db.Text
+  coverImage  String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime        @default(now())
+  attendees   EventAttendee[]
+}
+
+model EventAttendee {
+  id      String   @id @default(cuid())
+  status  String   @default("going")
+  userId  String
+  eventId String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model MarketplaceItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  price       Float
+  image       String?
+  category    String
+  condition   String   @default("used")
+  location    String?
+  createdAt   DateTime @default(now())
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+}
+
+model Reel {
+  id        String   @id @default(cuid())
+  video     String
+  caption   String?  @db.Text
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Page {
+  id          String       @id @default(cuid())
+  name        String
+  description String?      @db.Text
+  category    String
+  avatar      String?
+  coverImage  String?
+  createdAt   DateTime     @default(now())
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  followers   PageFollow[]
+}
+
+model PageFollow {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  pageId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pageId])
+}
+
+model SavedPost {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model WatchVideo {
+  id        String   @id @default(cuid())
+  title     String
+  channel   String
+  thumbnail String?
+  videoUrl  String?
+  duration  String   @default("0:00")
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model LiveStream {
+  id         String   @id @default(cuid())
+  title      String
+  thumbnail  String?
+  viewers    Int      @default(0)
+  isLive     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  streamerId String
+  streamer   User     @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+}
+
+model Game {
+  id        String   @id @default(cuid())
+  name      String
+  image     String?
+  players   Int      @default(0)
+  category  String
+  createdAt DateTime @default(now())
+}
+
+enum PlatformRole {
+  USER
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Privacy {
+  PUBLIC
+  FRIENDS
+  PRIVATE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum GroupRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  FRIEND_REQUEST
+  MESSAGE
+  EVENT
+  GROUP
+  MENTION
+}
+
+enum ReportType {
+  POST
+  COMMENT
+  USER
+  MESSAGE
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  type        ReportType
+  targetId    String
+  reason      String       @db.Text
+  details     String?      @db.Text
+  status      ReportStatus @default(PENDING)
+  adminNote   String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  reporterId  String
+  reviewerId  String?
+  reporter    User         @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewer    User?        @relation("ReportsReviewed", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([type, targetId])
+}
+
+model CallSignal {
+  id         String   @id @default(cuid())
+  roomId     String
+  signalType String
+  payload    String   @db.Text
+  consumed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  fromUserId String
+  toUserId   String
+  fromUser   User     @relation("SignalsSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User     @relation("SignalsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([toUserId, consumed, createdAt])
+  @@index([roomId])
+}
