@@ -1,175 +1,182 @@
-# ConnectSphere
+# 🌐 ConnectSphere
 
-A full-featured social platform with admin panel, user permissions, and MySQL database.
+> A full-featured modern social media platform built with **Next.js 16**, **TypeScript**, **Tailwind CSS**, **Prisma**, **MySQL**, and **NextAuth.js**.
 
-## Admin Panel
+<p align="center">
+  <img src="https://i.postimg.cc/Y0CY3dsR/Screenshot-3.png" alt="ConnectSphere Banner" width="100%">
+</p>
 
-| Page | URL |
-|------|-----|
-| **Admin Dashboard** | http://localhost:3005/admin |
-| **User Permissions** | http://localhost:3005/admin/users |
+<p align="center">
 
-**Admin login (after seeding database):**
-- Email: `admin@connectsphere.com`
-- Password: `admin123`
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38BDF8?logo=tailwind-css)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## .env Configuration
+</p>
 
-Copy `.env.example` to `.env` and set these values:
+---
 
-```env
-# MySQL with NO password (most local setups):
-DATABASE_URL="mysql://root@localhost:3306/connectsphere"
+# ✨ Features
 
-# MySQL WITH password (replace YOUR_PASSWORD):
-# DATABASE_URL="mysql://root:YOUR_PASSWORD@localhost:3306/connectsphere"
+- 🔐 Authentication with NextAuth
+- 👤 User Profiles
+- 📝 Create, Edit & Delete Posts
+- ❤️ Like & Comment System
+- 💬 Real-time Messaging
+- 📸 Image Upload via Postimages
+- 👥 Groups
+- 🛒 Marketplace
+- 🎥 Reels
+- 📅 Events
+- 🔔 Notifications
+- 🛡️ Admin Dashboard
+- 👑 Role & Permission Management
+- ✅ Verified Users
+- 🚫 Ban / Unban Users
 
-# App URL — must match the port you run on (default: 3005)
-NEXTAUTH_URL="http://localhost:3005"
-AUTH_SECRET="any-long-random-string-here"
-NEXTAUTH_SECRET="any-long-random-string-here"
-```
+---
 
-### DATABASE_URL format explained
+# 📸 Screenshots
 
-| Situation | What to type |
-|-----------|--------------|
-| No password | `mysql://root@localhost:3306/connectsphere` |
-| With password `mypass` | `mysql://root:mypass@localhost:3306/connectsphere` |
-| Different user | `mysql://USERNAME:PASSWORD@localhost:3306/connectsphere` |
+## 🏠 Home Feed
 
-## How to Run (Step by Step)
+<img src="https://i.postimg.cc/Dz1ryJG5/Screenshot-1.png" width="100%">
 
-### 1. Prerequisites
+---
 
-- **Node.js 18+** — [nodejs.org](https://nodejs.org)
-- **MySQL 8+** — XAMPP, WAMP, or standalone MySQL
+## 💬 Chat System
 
-### 2. Start MySQL
+<img src="https://i.postimg.cc/fyRmK8rH/Screenshot-2.png" width="100%">
 
-Make sure MySQL is running (XAMPP Control Panel → Start MySQL, or Windows Services).
+---
 
-### 3. Create the database
+## 🌐 Main Dashboard
 
-Open MySQL command line or phpMyAdmin and run:
+<img src="https://i.postimg.cc/Y0CY3dsR/Screenshot-3.png" width="100%">
 
-```sql
-CREATE DATABASE connectsphere;
-```
+---
 
-### 4. Install dependencies
+## 👥 Community
+
+<img src="https://i.postimg.cc/3RB2msnN/Screenshot-4.png" width="100%">
+
+---
+
+## 🛡️ Admin Panel
+
+<img src="https://i.postimg.cc/3R7gy8Ck/Screenshot-5.png" width="100%">
+
+---
+
+# 🛠 Tech Stack
+
+| Frontend | Backend | Database | Authentication |
+|----------|----------|-----------|---------------|
+| Next.js 16 | Prisma ORM | MySQL | NextAuth.js |
+| TypeScript | Node.js | | |
+| Tailwind CSS | | | |
+
+---
+
+# ⚙️ Installation
 
 ```bash
-cd F:\someproducts\my-social
+git clone https://github.com/yourusername/connectsphere.git
+
+cd connectsphere
+
 npm install
 ```
 
-### 5. Configure `.env`
-
-Edit `.env` — for no password use:
+Create `.env`
 
 ```env
 DATABASE_URL="mysql://root@localhost:3306/connectsphere"
+
 NEXTAUTH_URL="http://localhost:3005"
-AUTH_SECRET="connectsphere-dev-secret-change-in-production"
-NEXTAUTH_SECRET="connectsphere-dev-secret-change-in-production"
+
+AUTH_SECRET="your-secret"
+
+NEXTAUTH_SECRET="your-secret"
+
+POSTIMAGES_API_KEY="your-api-key"
 ```
 
-### 6. Set up database tables & seed data
+Run database
 
 ```bash
 npm run db:migrate
 npm run db:seed
 ```
 
-If migrate asks for a migration name, type: `init`
-
-### 7. Start the app
-
-**Development (recommended):**
+Start development
 
 ```bash
 npm run dev
 ```
 
-Open: **http://localhost:3005**
+Open
 
-**Production build:**
-
-```bash
-npm run build
-npm run start
+```
+http://localhost:3005
 ```
 
-### Common mistakes
+---
 
-| Problem | Solution |
-|---------|----------|
-| `EADDRINUSE port 3000` | Use `npm run dev` (runs on port **3005**) |
-| `NPM RUN DEV` error | Use lowercase: `npm run dev` |
-| Database connection failed | Check MySQL is running and `DATABASE_URL` is correct |
-| Admin page redirects to login | Log in with `admin@connectsphere.com` / `admin123` |
-| Empty admin users list | Run `npm run db:migrate` then `npm run db:seed` |
-
-## Admin Permissions
-
-As **Super Admin** you can:
-
-- Assign roles: User, Moderator, Admin, Super Admin
-- Ban / unban users
-- Grant verified badge
-- Toggle per-user permissions:
-  - Create Posts
-  - Comment on Posts
-  - Send Messages
-  - Go Live
-  - Create Groups
-  - Sell on Marketplace
-
-As **Admin** you can ban users and toggle permissions (but not change roles).
-
-## Image Hosting (Postimages.org)
-
-All user-uploaded images are hosted on [Postimages.org](https://postimages.org/) and stored as URLs in your MySQL database.
-
-1. Create a free account at https://postimages.org/
-2. Get your **API key** from account settings
-3. Add to `.env`:
-   ```env
-   POSTIMAGES_API_KEY="your-api-key-here"
-   ```
-4. Restart the dev server
-
-When users click **Photo** on a post, the image uploads to Postimages and the returned `i.postimg.cc` URL is saved in the database.
-
-## Real Database Data
-
-The platform now reads **all content from MySQL** — posts, users, messages, notifications, groups, events, marketplace, reels, and more. No more mock/template data.
-
-Re-seed sample data anytime:
-```bash
-npm run db:seed
-```
-
-## Demo Accounts
+# 👤 Demo Accounts
 
 | Role | Email | Password |
-|------|-------|----------|
-| Super Admin | admin@connectsphere.com | admin123 |
-| User | alex@connectsphere.com | password123 |
-| Moderator | sarah@example.com | password123 |
+|------|------|----------|
+| 👑 Super Admin | admin@connectsphere.com | admin123 |
+| 🛡️ Moderator | sarah@example.com | password123 |
+| 👤 User | alex@connectsphere.com | password123 |
 
-## Scripts
+---
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server on port 3005 |
-| `npm run build` | Production build |
-| `npm run start` | Start production server on port 3005 |
-| `npm run db:migrate` | Apply database migrations |
-| `npm run db:seed` | Seed demo + admin users |
-| `npm run db:studio` | Open Prisma database GUI |
+# 🛡️ Admin Panel
 
-## Tech Stack
+| Page | URL |
+|------|-----|
+| Dashboard | http://localhost:3005/admin |
+| Users | http://localhost:3005/admin/users |
 
-Next.js 16 · TypeScript · Tailwind CSS · Prisma · MySQL · NextAuth.js
+Super Admin can:
+
+- Manage Roles
+- Ban / Unban Users
+- Grant Verified Badge
+- Manage Permissions
+- Moderate Platform
+
+---
+
+# 📜 Available Scripts
+
+```bash
+npm run dev
+
+npm run build
+
+npm run start
+
+npm run db:migrate
+
+npm run db:seed
+
+npm run db:studio
+```
+
+---
+
+# ⭐ Support
+
+If you like this project, consider giving it a ⭐ on GitHub!
+
+---
+
+# 📄 License
+
+MIT License
